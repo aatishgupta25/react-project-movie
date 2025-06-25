@@ -4,17 +4,6 @@ import Spinner from './components/Spinner'
 import MovieCard from './components/MovieCard'
 import { useDebounce } from 'react-use'
 
-const API_BASE_URL = 'https://api.themoviedb.org/3'
-const API_KEY = import.meta.env.VITE_TMDB_API_KEY
-
-const API_OPTION = {
-  method: 'GET',
-  headers: {
-    accept: 'application/json',
-    Authorization: `Bearer ${API_KEY}`
-  }
-}
-
 function App() {
   const [searchTerm, setsearchTerm] = useState('');
   const [errorMessage, seterrorMessage] = useState('')
@@ -29,33 +18,29 @@ function App() {
   const fetchMovies = async (query = '') => {
     setisLoading(true)
     seterrorMessage('')
+  
     try {
-      const endpoint = query ? 
-        `${API_BASE_URL}/search/movie?query=${encodeURI(query)}` : 
-        `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
-      const response = await fetch(endpoint, API_OPTION)
-
+      const endpoint = query
+        ? `/api/movies?query=${encodeURIComponent(query)}`
+        : `/api/movies`;
+  
+      const response = await fetch(endpoint)
+  
       if (!response.ok) {
         throw new Error('Failed to fetch movies')
-      } 
-      const data = await response.json();
-
-      if (data.Response === 'False'){
-        seterrorMessage(data.Error || 'Failed To fetch movies')
-        setmovieList([])
-        return;
       }
-
+  
+      const data = await response.json()
       setmovieList(data.results || [])
-
     } catch (error) {
-
-      console.log(`Error fetching movies ${error}`)
+      console.error(`Error fetching movies:`, error)
       seterrorMessage('Error fetching movies, try again later.')
+      setmovieList([])
     } finally {
       setisLoading(false)
     }
   }
+  
   useEffect(() => {
     fetchMovies(debounchedSearchTerm)
   }, [debounchedSearchTerm])

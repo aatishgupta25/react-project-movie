@@ -21,8 +21,8 @@ function App() {
   
     try {
       const endpoint = query
-        ? `/api/movies?query=${encodeURIComponent(query)}`
-        : `/api/movies`;
+        ? `/api/movie?query=${encodeURIComponent(query)}`
+        : `/api/movie`;
   
       const response = await fetch(endpoint)
   
